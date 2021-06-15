@@ -24,6 +24,12 @@ dotnet add package Microsoft.Extensions.Hosting.WindowsServices
 dotnet build
 ```
 
+## 发布
+
+```bash
+dotnet publish -c Release -r win-x64 -o c:\test\workerpub
+```
+
 ## 安装服务
 
 使用 sc.exe 实用工具安装和管理服务。
