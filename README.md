@@ -27,3 +27,15 @@ dotnet build
 ## 安装服务
 
 使用 sc.exe 实用工具安装和管理服务。
+
+```bash
+sc create MyService binPath= C:\test\workerpub\MyService.exe start= auto displayname= "技术译站的测试服务"
+
+sc description MyService "这是一个由 Worker Service 实现的测试服务。"
+
+sc start MyService
+
+sc stop MyService
+
+sc delete MyService
+```
