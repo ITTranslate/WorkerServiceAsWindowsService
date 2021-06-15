@@ -14,7 +14,8 @@ namespace MyService
     {
         public static void Main(string[] args)
         {
-            // 作为 Windows Service 运行时，默认的当前工作目录是 C:\WINDOWS\system32，会导致找不到配置文件，所以需要添加一行。
+            // 作为 Windows Service 运行时，默认的当前工作目录是 C:\WINDOWS\system32，会导致找不到配置文件，
+            // 所以需要添加下面一行，指定当前工作目录为应用程序所在的实际目录。
             Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
 
             var configuration = new ConfigurationBuilder()
