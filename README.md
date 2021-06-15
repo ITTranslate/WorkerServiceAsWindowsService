@@ -10,8 +10,6 @@ git clone git@github.com:ITTranslate/WorkerServiceWithSerilog.git
 
 ## 添加必要的依赖库
 
-Serilog 文档：<https://serilog.net/>
-
 ```bash
 dotnet add package Microsoft.Extensions.Hosting.WindowsServices
 ```
@@ -27,3 +25,5 @@ dotnet build
 ```
 
 ## 安装服务
+
+使用 sc.exe 实用工具安装和管理服务。

@@ -9,15 +9,16 @@ using Microsoft.Extensions.Logging;
 namespace MyService
 {
     public class Worker : BackgroundService
-    {//IHostLifetime
-        private bool _isStopping = false; //是否正在停止工作
+    {
+        /// <summary>
+        /// 状态：0-默认状态，1-正在完成关闭前的必要工作，2-正在执行 StopAsync
+        /// </summary>
+        private volatile int _status = 0; //状态
         private readonly IHostApplicationLifetime _hostApplicationLifetime;
-        private readonly IHostLifetime _hostLifetime;
         private readonly ILogger<Worker> _logger;
 
-        public Worker(IHostLifetime hostLifetime, IHostApplicationLifetime hostApplicationLifetime, ILogger<Worker> logger)
+        public Worker(IHostApplicationLifetime hostApplicationLifetime, ILogger<Worker> logger)
         {
-            _hostLifetime = hostLifetime;
             _hostApplicationLifetime = hostApplicationLifetime;
             _logger = logger;
         }
@@ -30,6 +31,12 @@ namespace MyService
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            // 注册应用停止前需要完成的操作
+            _hostApplicationLifetime.ApplicationStopping.Register(() =>
+            {
+                GetOffWork();
+            });
+
             try
             {
                 // 这里实现实际的业务逻辑
@@ -51,28 +58,35 @@ namespace MyService
             }
             finally
             {
-                _logger.LogWarning("Exiting application...");
-                GetOffWork(stoppingToken); //关闭前需要完成的工作
-                _hostApplicationLifetime.StopApplication(); //手动调用 StopApplication
+                _logger.LogWarning("My worker service shutdown.");
             }
         }
 
         private async Task SomeMethodThatDoesTheWork(CancellationToken cancellationToken)
         {
-            if (_isStopping)
-                _logger.LogInformation("假装还在埋头苦干ing…… 其实我去洗杯子了");
-            else
-                _logger.LogInformation("我爱工作，埋头苦干ing……");
+            string msg = _status switch
+            {
+                1 => "正在完成关闭前的必要工作……",
+                2 => "假装还在埋头苦干ing…… 其实我去洗杯子了",
+                _ => "我爱工作，埋头苦干ing……"
+            };
 
+            _logger.LogInformation(msg);
             await Task.CompletedTask;
         }
 
         /// <summary>
         /// 关闭前需要完成的工作
         /// </summary>
-        private void GetOffWork(CancellationToken cancellationToken)
+        private void GetOffWork()
         {
-            _logger.LogInformation("啊，糟糕，有一个紧急 bug 需要下班前完成！！！");
+            _status = 1;
+
+            _logger.LogInformation("太好了，下班时间到，output from ApplicationStopping.Register Action at: {time}", DateTimeOffset.Now);           
+
+            _logger.LogDebug("开始处理关闭前必须完成的工作 at: {time}", DateTimeOffset.Now);
+
+            _logger.LogInformation("糟糕，有一个紧急 bug 需要下班前完成！！！");
 
             _logger.LogInformation("啊啊啊，我爱加班，我要再干 20 秒，Wait 1 ");
 
@@ -82,14 +96,16 @@ namespace MyService
 
             Task.Delay(TimeSpan.FromMinutes(1)).Wait();
 
-            _logger.LogInformation("啊哈哈哈哈哈，终于好了，下班走人！");
+            _logger.LogInformation("啊哈哈哈哈哈，终于好了，可以下班了！");
+
+            _logger.LogDebug("关闭前必须完成的工作处理完成 at: {time}", DateTimeOffset.Now);
         }
 
         public override Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("太好了，下班时间到了，output from StopAsync at: {time}", DateTimeOffset.Now);
+            _status = 2;
 
-            _isStopping = true;
+            _logger.LogInformation("准备下班了，output from StopAsync at: {time}", DateTimeOffset.Now);
 
             _logger.LogInformation("去洗洗茶杯先……", DateTimeOffset.Now);
             Task.Delay(30_000).Wait();
