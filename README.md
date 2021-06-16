@@ -1,4 +1,4 @@
-# .NET Worker Service 作为 Windows Service 运行
+# .NET Worker Service 作为 Windows 服务运行及优雅退出改进
 
 <!-- [Read the related article](https://ittranslator.cn/dotnet/csharp/2021/05/31/worker-service-with-serilog.html). -->
 
