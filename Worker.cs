@@ -25,18 +25,18 @@ namespace MyService
 
         public override Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("上班了，又是精神抖擞的一天，output from StartAsync");
-            return base.StartAsync(cancellationToken);
-        }
-
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
             // 注册应用停止前需要完成的操作
             _hostApplicationLifetime.ApplicationStopping.Register(() =>
             {
                 GetOffWork();
             });
 
+            _logger.LogInformation("上班了，又是精神抖擞的一天，output from StartAsync");
+            return base.StartAsync(cancellationToken);
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
             try
             {
                 // 这里实现实际的业务逻辑
@@ -58,7 +58,7 @@ namespace MyService
             }
             finally
             {
-                _logger.LogWarning("My worker service shutdown.");
+                _logger.LogWarning("My worker service shut down.");
             }
         }
 
